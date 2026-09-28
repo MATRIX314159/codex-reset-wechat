@@ -1,0 +1,13 @@
+{
+  "name": "codex-reset-wechat-monitor",
+  "version": "3.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node scripts/monitor.mjs",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

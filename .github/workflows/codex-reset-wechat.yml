@@ -1,0 +1,53 @@
+name: Codex Reset WeChat Monitor
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+    inputs:
+      send_test:
+        description: "发送一条微信测试消息"
+        required: false
+        default: false
+        type: boolean
+      send_current:
+        description: "发送 codex-resets.com 当前状态"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: codex-reset-wechat-monitor
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Restore notifier state
+        uses: actions/cache@v4
+        with:
+          path: .state
+          key: codex-reset-wechat-v3-${{ github.run_id }}
+          restore-keys: |
+            codex-reset-wechat-v3-
+
+      - name: Check codex-resets.com and notify WeChat
+        env:
+          SERVERCHAN_SENDKEY: ${{ secrets.SERVERCHAN_SENDKEY }}
+          SEND_TEST: ${{ github.event.inputs.send_test || 'false' }}
+          SEND_CURRENT: ${{ github.event.inputs.send_current || 'false' }}
+        run: node scripts/monitor.mjs
